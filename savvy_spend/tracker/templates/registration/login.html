@@ -1,12 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="header">Please login</div>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-  </form>
-  <br/><br/>
-  <a href="/register">...or sign up</a>
+<div class="login-container">
+    <h1>Welcome to SavvySpend</h1>
+    <form method="post" class="login-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="login-button">Log in</button>
+    </form>
+    <div class="signup-link">
+        <p>Don't have an account yet? <a href="/register">Sign up</a></p>
+    </div>
+</div>
 {% endblock %}

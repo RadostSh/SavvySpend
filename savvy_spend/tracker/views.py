@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth import login
 from .forms import RegisterUserForm
 from .models import Category, Transaction
@@ -25,6 +26,17 @@ def register(request):
         'form': form
     }
     return render(request, 'registration/register.html', context)
+
+@require_http_methods(["POST"])
+def add_category(request):
+    # Взимане на името на категорията от POST данните
+    category_name = request.POST.get('category_name', '').strip()
+    if category_name:  # Проверка дали името не е празно
+        Category.objects.create(name=category_name)
+        return redirect(reverse('list_categories'))  # Redirect към страницата с категории
+    
+    # Връщане обратно към формата със съобщение за грешка
+    return render(request, 'categories/list_categories.html', {'error': "The category name cannot be empty."})
 
 def list_categories(request):
     categories = Category.objects.all()
