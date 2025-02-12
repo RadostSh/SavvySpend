@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
 from django.contrib.auth import login
 from .forms import RegisterUserForm
 from .models import Category, Transaction
@@ -29,18 +30,16 @@ def register(request):
 
 @require_http_methods(["POST"])
 def add_category(request):
-    # Взимане на името на категорията от POST данните
     category_name = request.POST.get('category_name', '').strip()
-    if category_name:  # Проверка дали името не е празно
+    if category_name:
         Category.objects.create(name=category_name)
-        return redirect(reverse('list_categories'))  # Redirect към страницата с категории
+        return JsonResponse({'success': True})
     
-    # Връщане обратно към формата със съобщение за грешка
-    return render(request, 'categories/list_categories.html', {'error': "The category name cannot be empty."})
+    return JsonResponse({'success': False, 'error': "The category name cannot be empty."})
 
 def list_categories(request):
     categories = Category.objects.all()
-    return render(request, 'categories/list_categories.html', {'categories': categories})
+    return render(request, 'categories.html', {'categories': categories})
 
 def list_transactions(request):
     transactions = Transaction.objects.all().order_by('-date')  # Сортиране по дата в низходящ ред

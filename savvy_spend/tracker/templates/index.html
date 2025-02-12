@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="welcome-container">
-    <h1>Welcome!</h1>
+    <h1>Welcome to SavvySpend!</h1>
 </div>
 
 <div class="grid-container">
@@ -13,11 +13,17 @@
 
     <div class="card categories">
         <h2>Categories</h2>
-        <form action="{% url 'add_category' %}" method="post">
-            {% csrf_token %}
-            <input type="text" name="category_name" placeholder="Enter new category name">
-            <button type="submit">Add Category</button>
-        </form>
+    <ul id="category-list">
+        {% for category in categories %}
+        <li>{{ category.name }}</li>
+        {% endfor %}
+    </ul>
+    <form id="add-category-form">
+        {% csrf_token %}
+        <input type="text" name="category_name" placeholder="Enter new category name">
+        <button type="submit">Add Category</button>
+    </form>
+    <a href="{% url 'categories' %}">View All Categories</a>
     </div>
 
     <div class="card budget">
@@ -30,4 +36,10 @@
     {% csrf_token %}
     <button type="submit">Logout</button>
 </form>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    var addCategoryUrl = "{% url 'add_category' %}";
+</script>
 {% endblock %}
