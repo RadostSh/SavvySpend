@@ -51,9 +51,7 @@
 
     <div class="card categories">
         <h2>Categories</h2>
-        <ul id="category-list">
-            <!-- Категориите ще се добавят тук чрез JavaScript -->
-        </ul>
+        <ul id="category-list"></ul>
         <form id="add-category-form" action="{% url 'add_category' %}" method="post">
             {% csrf_token %}
             <input type="text" name="name" placeholder="Enter new category name">

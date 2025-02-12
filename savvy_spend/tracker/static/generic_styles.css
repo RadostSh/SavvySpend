@@ -150,3 +150,187 @@ body {
 .button button:hover {
     background-color: #db7093;
 }
+
+/* Контейнер за картите */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Еднаква ширина за всички карти */
+    gap: 20px; /* Разстояние между картите */
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+/* Стилове за всички карти */
+.card {
+    background-color: #ffffff;
+    border: 1px solid #b19cd9;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    min-width: 300px; /* Минимална ширина за всички карти */
+}
+
+/* Стилове за картата с транзакции */
+.card.transactions {
+    text-align: left; /* Подравняване на текста вляво */
+}
+
+.card.transactions h2 {
+    color: #db7093;
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+}
+
+/* Стилове за формата */
+#add-transaction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#add-transaction-form div {
+    margin-bottom: 10px;
+}
+
+#add-transaction-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: bold;
+}
+
+#add-transaction-form input[type="date"],
+#add-transaction-form input[type="number"],
+#add-transaction-form select,
+#add-transaction-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+#add-transaction-form select {
+    appearance: none;
+    background-color: white;
+}
+
+#add-transaction-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Стилове за бутона */
+#add-transaction-form button[type="submit"] {
+    background-color: #6a5acd;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#add-transaction-form button[type="submit"]:hover {
+    background-color: #9370db;
+}
+
+/* Стилове за връзката "View All Transactions" */
+.card.transactions a {
+    display: inline-block;
+    margin-top: 15px;
+    color: #6a5acd;
+    text-decoration: none;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+}
+
+.card.transactions a:hover {
+    text-decoration: underline;
+}
+
+/* Стилове за картата с категории */
+.card.categories {
+    background-color: #ffffff;
+    border: 1px solid #b19cd9;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    min-width: 300px; /* Минимална ширина за съгласуваност с другите карти */
+}
+
+.card.categories h2 {
+    color: #db7093;
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+}
+
+/* Стилове за списъка с категории */
+#category-list {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+#category-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Стилове за формата за добавяне на категория */
+#add-category-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#add-category-form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+#add-category-form button[type="submit"] {
+    background-color: #6a5acd;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#add-category-form button[type="submit"]:hover {
+    background-color: #9370db;
+}
+
+/* Стилове за връзката "View All Categories" */
+.card.categories a {
+    display: inline-block;
+    margin-top: 15px;
+    color: #6a5acd;
+    text-decoration: none;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+}
+
+.card.categories a:hover {
+    text-decoration: underline;
+}
