@@ -1,8 +1,7 @@
 from django import forms
-
+from .models import Transaction, Category
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-
 
 class RegisterUserForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
@@ -13,3 +12,29 @@ class RegisterUserForm(UserCreationForm):
         model = User
         fields = ("username", "first_name", "last_name",
                   "password1", "password2")
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'Enter category name'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(CategoryForm, self).__init__(*args, **kwargs)
+
+class TransactionForm(forms.ModelForm):
+    class Meta:
+        model = Transaction
+        fields = ['date', 'type', 'amount', 'category', 'description']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'type': forms.Select(),
+            'category': forms.Select(),
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(TransactionForm, self).__init__(*args, **kwargs)
+        self.fields['category'].queryset = Category.objects.all()
