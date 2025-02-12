@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
@@ -37,7 +37,6 @@ def add_category(request):
         if form.is_valid():
             category = form.save()
 
-            # Проверка дали заявката идва от AJAX (JavaScript)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
@@ -47,27 +46,25 @@ def add_category(request):
                     }
                 })
 
-    # Ако GET заявка - показва страницата с празна форма
     return render(request, 'index.html', {'form': form, 'categories': categories})
 
 
 def list_categories(request):
-    categories = Category.objects.all().order_by('name')  # Взема всички категории от базата
+    categories = Category.objects.all().order_by('name')
     return render(request, 'categories/list_categories.html', {'categories': categories})
 
 def list_transactions(request):
-    transactions = Transaction.objects.all().order_by('-date')  # Сортиране по дата в низходящ ред
+    transactions = Transaction.objects.all().order_by('-date')
     return render(request, 'transactions/list_transactions.html', {'transactions': transactions})
 
 def add_transaction(request):
-    form = TransactionForm()  # Дефинираме формата в началото
+    form = TransactionForm() 
     transactions = Transaction.objects.all().order_by('-date')
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
             transaction = form.save()
             
-            # Връщане на JSON отговор за AJAX заявка
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
@@ -81,3 +78,28 @@ def add_transaction(request):
                 })
     
     return render(request, 'index.html', {'form': form, 'transactions': transactions})
+
+def edit_transaction(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id)
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, instance=transaction)
+        if form.is_valid():
+            form.save()
+            return redirect('list_transactions')
+    else:
+        form = TransactionForm(instance=transaction)
+
+    return render(request, 'transactions/edit_transaction.html', {'form': form, 'transaction': transaction})
+
+def delete_transaction(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id)
+    transaction.delete()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'transaction_id': transaction_id,
+            'message': 'Transaction deleted successfully.'
+        })
+
+    return redirect('transactions/list_transactions')

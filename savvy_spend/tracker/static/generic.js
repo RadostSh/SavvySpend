@@ -1,5 +1,5 @@
 document.getElementById('add-category-form').addEventListener('submit', function(e) {
-    e.preventDefault();  // Спира стандартното изпращане на формата
+    e.preventDefault();
 
     const formData = new FormData(this);
 
@@ -15,13 +15,11 @@ document.getElementById('add-category-form').addEventListener('submit', function
         if (data.success) {
             alert('Category added successfully');
 
-            // Добавяне на новата категория в списъка без презареждане
             const categoryList = document.getElementById('category-list');
             const newListItem = document.createElement('li');
             newListItem.textContent = data.category.name;
             categoryList.appendChild(newListItem);
 
-            // Ако има dropdown за категории, добавяме новата категория в него
             const categoryDropdown = document.getElementById('category');
             if (categoryDropdown) {
                 const newOption = document.createElement('option');
@@ -30,7 +28,7 @@ document.getElementById('add-category-form').addEventListener('submit', function
                 categoryDropdown.appendChild(newOption);
             }
 
-            this.reset(); // Изчистване на формата
+            this.reset();
         } else {
             alert('Error: ' + data.error);
         }
@@ -38,9 +36,8 @@ document.getElementById('add-category-form').addEventListener('submit', function
     .catch(error => console.error('Error:', error));
 });
 
-
 document.getElementById('add-transaction-form').addEventListener('submit', function(e) {
-    e.preventDefault();  // Спира стандартното изпращане на формата
+    e.preventDefault();
     const formData = new FormData(this);
 
     fetch("{% url 'add_transaction' %}", {
@@ -55,7 +52,6 @@ document.getElementById('add-transaction-form').addEventListener('submit', funct
         if (data.success) {
             alert('Transaction added successfully');
 
-            // Добавяне на транзакцията в таблицата без презареждане
             const newTransactionElement = document.createElement('tr');
             newTransactionElement.innerHTML = `
                 <td>${data.transaction.date}</td>
@@ -65,7 +61,7 @@ document.getElementById('add-transaction-form').addEventListener('submit', funct
                 <td>${data.transaction.description}</td>`;
             document.getElementById('transaction-list').appendChild(newTransactionElement);
 
-            this.reset(); // Изчистване на формата
+            this.reset();
         } else {
             alert('Error: ' + data.error);
         }
@@ -73,5 +69,24 @@ document.getElementById('add-transaction-form').addEventListener('submit', funct
     .catch(error => console.error('Error:', error));
 });
 
+function deleteTransaction(transactionId) {
+    if (!confirm("Are you sure you want to delete this transaction?")) return;
 
-
+    fetch(`/transactions/delete/${transactionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message); // "Transaction deleted successfully."
+            document.getElementById(`transaction-${transactionId}`).remove();
+        } else {
+            alert("Error deleting transaction.");
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
