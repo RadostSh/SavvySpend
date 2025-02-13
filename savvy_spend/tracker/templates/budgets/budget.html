@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Budget Management</h1>
+
+<!-- Показване на текущ баланс -->
+<p>Your Current Balance: <strong>${{ balance }}</strong></p>
+
+<!-- Форма за добавяне на нов бюджет -->
+<h2>Set Your Monthly Budget</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Budget</button>
+</form>
+
+<!-- Списък с бюджети -->
+<h2>Existing Budgets</h2>
+<ul>
+    {% for budget in budgets %}
+    <li>{{ budget.month }}: <strong>${{ budget.amount }}</strong></li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'index' %}" class="home-link">Back to Home</a>
+
+{% endblock %}

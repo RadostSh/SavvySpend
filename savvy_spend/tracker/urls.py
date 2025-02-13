@@ -19,4 +19,5 @@ urlpatterns = [
     path('transactions/delete/<int:transaction_id>/', views.delete_transaction, name='delete_transaction'),
     path('delete_category/<int:category_id>/', views.delete_category, name='delete_category'),
     path('category_transactions/<int:category_id>/', views.category_transactions, name='category_transactions'),
+    path('budget/', views.budget, name='budget'),
 ]

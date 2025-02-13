@@ -29,6 +29,6 @@
         {% endfor %}
     </tbody>
 </table>
-<a href="{% url 'add_category' %}" class="home-link">Back to Home page</a>
+<a href="{% url 'index' %}" class="home-link">Back to Home page</a>
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 {% endblock %}

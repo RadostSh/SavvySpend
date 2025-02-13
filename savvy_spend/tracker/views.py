@@ -1,17 +1,26 @@
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.db import models
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login
-from .forms import RegisterUserForm, TransactionForm, CategoryForm
-from .models import Category, Transaction
+from .forms import RegisterUserForm, TransactionForm, CategoryForm, BudgetForm
+from .models import Category, Transaction, Budget
 
 @login_required(login_url='/login')
 def index(request):
     """Welcome page."""
+    total_income = Transaction.objects.filter(type='income').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    total_expense = Transaction.objects.filter(type='expense').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    balance = round(total_income - total_expense, 2)
+
+    categories = Category.objects.all()
+
     context = {
-        'username': request.user.username
+        'username': request.user.username,
+        'categories': categories,
+        'balance': balance
     }
     return render(request, 'index.html', context)
 
@@ -32,6 +41,11 @@ def register(request):
 def add_category(request):
     form = CategoryForm()
     categories = Category.objects.all().order_by('name')
+
+    total_income = Transaction.objects.filter(type='income').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    total_expense = Transaction.objects.filter(type='expense').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    balance = round(total_income - total_expense, 2)
+
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -46,7 +60,7 @@ def add_category(request):
                     }
                 })
 
-    return render(request, 'index.html', {'form': form, 'categories': categories})
+    return render(request, 'index.html', {'form': form, 'categories': categories, 'balance': balance})
 
 
 def list_categories(request):
@@ -60,6 +74,11 @@ def list_transactions(request):
 def add_transaction(request):
     form = TransactionForm() 
     transactions = Transaction.objects.all().order_by('-date')
+
+    total_income = Transaction.objects.filter(type='income').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    total_expense = Transaction.objects.filter(type='expense').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    balance = round(total_income - total_expense, 2)
+
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
@@ -77,7 +96,7 @@ def add_transaction(request):
                     }
                 })
     
-    return render(request, 'index.html', {'form': form, 'transactions': transactions})
+    return render(request, 'index.html', {'form': form, 'transactions': transactions, 'balance': balance})
 
 def edit_transaction(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id)
@@ -120,3 +139,25 @@ def category_transactions(request, category_id):
     transactions = Transaction.objects.filter(category=category)
 
     return render(request, 'categories/category_transactions.html', {'category': category, 'transactions': transactions})
+
+@login_required
+def budget(request):
+    user = request.user
+    budgets = Budget.objects.filter(user=user).order_by('-created_at')
+
+    if request.method == 'POST':
+        form = BudgetForm(request.POST)
+        if form.is_valid():
+            budget = form.save(commit=False)
+            budget.user = user
+            budget.save()
+            return redirect('budget')
+    else:
+        form = BudgetForm()
+
+    # Calculation of the current balance
+    total_income = Transaction.objects.filter(type='income').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    total_expense = Transaction.objects.filter(type='expense').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    balance = round(total_income - total_expense, 2)
+
+    return render(request, 'budgets/budget.html', {'form': form, 'budgets': budgets, 'balance': balance})

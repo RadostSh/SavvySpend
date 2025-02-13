@@ -1,5 +1,5 @@
 from django import forms
-from .models import Transaction, Category
+from .models import Transaction, Category, Budget
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -38,3 +38,12 @@ class TransactionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TransactionForm, self).__init__(*args, **kwargs)
         self.fields['category'].queryset = Category.objects.all()
+
+class BudgetForm(forms.ModelForm):
+    class Meta:
+        model = Budget
+        fields = ['month', 'amount']
+        widgets = {
+            'month': forms.TextInput(attrs={'placeholder': 'Enter month, e.g., February 2025'}),
+            'amount': forms.NumberInput(attrs={'placeholder': 'Enter budget amount'}),
+        }
