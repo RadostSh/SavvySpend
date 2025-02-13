@@ -112,3 +112,39 @@ function deleteCategory(categoryId) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+document.getElementById('add-budget-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch("{% url 'budget' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Budget added successfully');
+
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${data.budget.month}/${data.budget.year}</td>
+                <td>$0.00</td>  <!-- Тук може да добавим приходи, ако искаш -->
+                <td>$0.00</td>  <!-- Тук може да добавим разходи -->
+                <td>$${data.budget.amount}</td>
+            `;
+            document.getElementById('budget-list').appendChild(newRow);
+
+            this.reset();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+

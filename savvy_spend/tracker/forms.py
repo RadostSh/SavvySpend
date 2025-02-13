@@ -2,6 +2,7 @@ from django import forms
 from .models import Transaction, Category, Budget
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from datetime import datetime
 
 class RegisterUserForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
@@ -42,8 +43,9 @@ class TransactionForm(forms.ModelForm):
 class BudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
-        fields = ['month', 'amount']
+        fields = ['amount', 'month', 'year']
         widgets = {
-            'month': forms.TextInput(attrs={'placeholder': 'Enter month, e.g., February 2025'}),
-            'amount': forms.NumberInput(attrs={'placeholder': 'Enter budget amount'}),
+            'amount': forms.NumberInput(attrs={'step': '0.01'}),
+            'month': forms.Select(choices=[(i, i) for i in range(1, 13)]),
+            'year': forms.Select(choices=[(y, y) for y in range(2020, datetime.now().year + 2)])
         }

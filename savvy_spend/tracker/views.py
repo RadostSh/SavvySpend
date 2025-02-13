@@ -5,6 +5,8 @@ from django.db import models
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login
+from django.db.models import Sum
+from datetime import date
 from .forms import RegisterUserForm, TransactionForm, CategoryForm, BudgetForm
 from .models import Category, Transaction, Budget
 
@@ -50,6 +52,7 @@ def add_category(request):
         form = CategoryForm(request.POST)
         if form.is_valid():
             category = form.save()
+            category.user = request.user
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -83,6 +86,7 @@ def add_transaction(request):
         form = TransactionForm(request.POST)
         if form.is_valid():
             transaction = form.save()
+            transaction.user = request.user
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -143,21 +147,69 @@ def category_transactions(request, category_id):
 @login_required
 def budget(request):
     user = request.user
-    budgets = Budget.objects.filter(user=user).order_by('-created_at')
+    current_month = date.today().month
+    current_year = date.today().year
+
+    # Намираме или създаваме бюджет за текущия месец
+    monthly_budget, created = Budget.objects.get_or_create(
+        user=user,
+        month=current_month,
+        year=current_year,
+        defaults={'amount': 0}  
+    )
 
     if request.method == 'POST':
-        form = BudgetForm(request.POST)
+        form = BudgetForm(request.POST, instance=monthly_budget)
         if form.is_valid():
-            budget = form.save(commit=False)
-            budget.user = user
-            budget.save()
-            return redirect('budget')
-    else:
-        form = BudgetForm()
+            budget = form.save()
+            
+            # ✅ Проверяваме дали заявката е AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'budget': {
+                        'month': budget.month,
+                        'year': budget.year,
+                        'amount': str(budget.amount)
+                    }
+                })
 
-    # Calculation of the current balance
-    total_income = Transaction.objects.filter(type='income').aggregate(models.Sum('amount'))['amount__sum'] or 0
-    total_expense = Transaction.objects.filter(type='expense').aggregate(models.Sum('amount'))['amount__sum'] or 0
+            return redirect('budget')  # Ако не е AJAX, редиректваме
+
+    else:
+        form = BudgetForm(instance=monthly_budget)
+
+    # ✅ Зареждаме всички бюджети на потребителя
+    existing_budgets = Budget.objects.filter(user=user).order_by('-year', '-month')
+
+    # ✅ Изчисляваме Total Income & Total Expense за текущия месец
+    total_income = Transaction.objects.filter(
+        user=user, type='income', date__month=current_month, date__year=current_year
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    total_expense = Transaction.objects.filter(
+        user=user, type='expense', date__month=current_month, date__year=current_year
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
     balance = round(total_income - total_expense, 2)
 
-    return render(request, 'budgets/budget.html', {'form': form, 'budgets': budgets, 'balance': balance})
+    # ✅ Добавяме Total Income & Total Expense за всеки бюджет
+    for budget in existing_budgets:
+        budget.total_income = Transaction.objects.filter(
+            type='income', date__month=budget.month, date__year=budget.year
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+        budget.total_expense = Transaction.objects.filter(
+            type='expense', date__month=budget.month, date__year=budget.year
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+        # ✅ Изчисляваме разликата
+        budget.difference = round(budget.total_income - budget.total_expense, 2)
+
+    return render(request, 'budgets/budget.html', {
+        'form': form,
+        'total_income': total_income,
+        'total_expense': total_expense,
+        'balance': balance,  # ✅ Добавяме баланса
+        'existing_budgets': existing_budgets  # ✅ Изпращаме списъка с бюджети
+    })

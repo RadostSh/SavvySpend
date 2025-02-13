@@ -41,7 +41,7 @@ body {
 }
 
 .form-group input {
-    width: 100%;
+    width: 93%;
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -529,4 +529,10 @@ form button[type="submit"] {
 
 #category-list li button:hover {
     background-color: #a90c0c;
+}
+
+.budget-container h2 {
+    color: #db7093;
+    margin-bottom: 20px;
+    font-size: 30px;
 }

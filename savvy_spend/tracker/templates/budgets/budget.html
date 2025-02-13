@@ -1,27 +1,49 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Budget Management</h1>
-
-<!-- Показване на текущ баланс -->
-<p>Your Current Balance: <strong>${{ balance }}</strong></p>
+<div class="budget-container">
+    <h1>Budget Management</h1>
 
 <!-- Форма за добавяне на нов бюджет -->
 <h2>Set Your Monthly Budget</h2>
-<form method="post">
+<form id="add-budget-form" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Save Budget</button>
 </form>
 
-<!-- Списък с бюджети -->
+<!-- Таблица за показване на съществуващите бюджети -->
 <h2>Existing Budgets</h2>
-<ul>
-    {% for budget in budgets %}
-    <li>{{ budget.month }}: <strong>${{ budget.amount }}</strong></li>
-    {% endfor %}
-</ul>
+<table>
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Total Income</th>
+            <th>Total Expenses</th>
+            <th>Difference</th>
+        </tr>
+    </thead>
+    <tbody id="budget-list">
+        {% for budget in existing_budgets %}
+        <tr>
+            <td>{{ budget.month }}/{{ budget.year }}</td>
+            <td>${{ budget.total_income|default:"0.00" }}</td>
+            <td>${{ budget.total_expense|default:"0.00" }}</td>
+            <td>
+                {% if budget.difference >= 0 %}
+                    <span style="color: green;">+${{ budget.difference }}</span>
+                {% else %}
+                    <span style="color: red;">-${{ budget.difference|floatformat:2 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No budgets found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 <a href="{% url 'index' %}" class="home-link">Back to Home</a>
+</div>
 
 {% endblock %}

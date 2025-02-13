@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Transaction
+from .models import Category, Transaction, Budget
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -13,3 +13,9 @@ class TransactionAdmin(admin.ModelAdmin):
     search_fields = ('description',)
 
 admin.site.register(Transaction, TransactionAdmin)
+
+class BudgetAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'created_at')
+    search_fields = ('user__username',)
+
+admin.site.register(Budget, BudgetAdmin)
