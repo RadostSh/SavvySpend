@@ -472,3 +472,61 @@ form button[type="submit"] {
 .list-transactions-page:hover {
     background-color: #9370db;
 }
+
+.list-categories{
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #6a5acd;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.list-categories:hover {
+    background-color: #9370db;
+}
+
+#category-list {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+#category-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#category-list li a {
+    color: #6a5acd;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#category-list li a:hover {
+    text-decoration: underline;
+}
+
+#category-list li button {
+    background-color: #d24747;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#category-list li button:hover {
+    background-color: #a90c0c;
+}

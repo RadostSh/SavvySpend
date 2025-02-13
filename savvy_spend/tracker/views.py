@@ -103,3 +103,20 @@ def delete_transaction(request, transaction_id):
         })
 
     return redirect('transactions/list_transactions')
+
+def delete_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    
+    if request.method == 'POST':
+        category.delete()
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'category_id': category_id})
+
+    return redirect('list_categories')
+
+def category_transactions(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    transactions = Transaction.objects.filter(category=category)
+
+    return render(request, 'categories/category_transactions.html', {'category': category, 'transactions': transactions})

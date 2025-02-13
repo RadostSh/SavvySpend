@@ -3,14 +3,15 @@
 {% block content %}
 <h1>All Categories</h1>
 
-{% if categories %}
-<ul>
+<ul id="category-list">
     {% for category in categories %}
-    <li>{{ category.name }}</li> 
+    <li id="category-{{ category.id }}">
+        <a href="{% url 'category_transactions' category.id %}">{{ category.name }}</a>
+        <button onclick="deleteCategory('{% if category.id %}{{ category.id }}{% endif %}')">Delete</button>
+    </li>
     {% endfor %}
 </ul>
-{% else %}
-<p>No categories found.</p>
-{% endif %}
+
 <a href="{% url 'add_category' %}" class="home-link">Back to Home page</a>
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 {% endblock %}

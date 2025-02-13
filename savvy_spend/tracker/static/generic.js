@@ -82,10 +82,32 @@ function deleteTransaction(transactionId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message); // "Transaction deleted successfully."
+            alert(data.message);
             document.getElementById(`transaction-${transactionId}`).remove();
         } else {
             alert("Error deleting transaction.");
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function deleteCategory(categoryId) {
+    if (!confirm("Are you sure you want to delete this category?")) return;
+
+    fetch(`/delete_category/${categoryId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Category deleted successfully!");
+            document.getElementById(`category-${categoryId}`).remove();
+        } else {
+            alert("Error deleting category.");
         }
     })
     .catch(error => console.error('Error:', error));
