@@ -10,6 +10,7 @@ from decimal import Decimal
 from datetime import date
 from .forms import RegisterUserForm, TransactionForm, CategoryForm, BudgetForm, SavingGoalForm
 from .models import Category, Transaction, Budget, SavingGoal
+from .currency import get_exchange_rate
 
 @login_required(login_url='/login')
 def index(request):
@@ -48,16 +49,12 @@ def add_category(request):
     form = CategoryForm()
     categories = Category.objects.all().order_by('name')
 
-    total_income = Transaction.objects.filter(type='income').aggregate(models.Sum('amount'))['amount__sum'] or 0
-    total_expense = Transaction.objects.filter(type='expense').aggregate(models.Sum('amount'))['amount__sum'] or 0
-    balance = round(total_income - total_expense, 2)
-
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
             category = form.save(commit=False)
             category.user = user
-            category = form.save()
+            category.save()
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -86,16 +83,12 @@ def add_transaction(request):
     form = TransactionForm() 
     transactions = Transaction.objects.all().order_by('-date')
 
-    total_income = Transaction.objects.filter(type='income').aggregate(models.Sum('amount'))['amount__sum'] or 0
-    total_expense = Transaction.objects.filter(type='expense').aggregate(models.Sum('amount'))['amount__sum'] or 0
-    balance = round(total_income - total_expense, 2)
-
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = user
-            transaction = form.save()
+            transaction.save()
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -109,7 +102,7 @@ def add_transaction(request):
                     }
                 })
     
-    return render(request, 'index.html', {'form': form, 'transactions': transactions, 'balance': balance})
+    return render(request, 'index.html', {'form': form, 'transactions': transactions})
 
 @login_required
 def edit_transaction(request, transaction_id):
@@ -146,7 +139,10 @@ def delete_category(request, category_id):
         category.delete()
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': True, 'category_id': category_id})
+            return JsonResponse({
+                'success': True, 
+                'category_id': category_id, 
+                'message': 'Category deleted successfully.'})
 
     return redirect('list_categories')
 
@@ -174,16 +170,6 @@ def budget(request):
         form = BudgetForm(request.POST, instance=monthly_budget)
         if form.is_valid():
             budget = form.save()
-            
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'budget': {
-                        'month': budget.month,
-                        'year': budget.year,
-                        'amount': str(budget.amount)
-                    }
-                })
 
             return redirect('budget')
 
@@ -274,3 +260,32 @@ def add_to_savings(request, goal_id):
             return redirect("savings")
 
     return redirect("savings")
+
+def convert_currency(request):
+    """Конвертира сума от една валута в друга."""
+    if request.method == "GET":
+        from_currency = request.GET.get("from")
+        to_currency = request.GET.get("to")
+        amount = request.GET.get("amount")
+
+        if not from_currency or not to_currency or not amount:
+            return JsonResponse({"error": "Missing parameters"}, status=400)
+        
+        try:
+            amount = float(amount)
+            rate = get_exchange_rate(from_currency, to_currency)
+            
+            if rate is None:
+                return JsonResponse({"error": "Invalid currency or API error"}, status=400)
+
+            converted_amount = round(amount * rate, 2)
+            return JsonResponse({
+                "success": True,
+                "converted_amount": converted_amount,
+                "rate": rate
+            })
+
+        except ValueError:
+            return JsonResponse({"error": "Invalid amount"}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)

@@ -22,4 +22,5 @@ urlpatterns = [
     path('budget/', views.budget, name='budget'),
     path('savings/', views.savings, name='savings'),
     path('savings/add/<int:goal_id>/', views.add_to_savings, name='add_to_savings'),
+    path('convert/', views.convert_currency, name='convert_currency'),
 ]

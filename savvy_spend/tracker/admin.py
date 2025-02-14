@@ -15,7 +15,7 @@ class TransactionAdmin(admin.ModelAdmin):
 admin.site.register(Transaction, TransactionAdmin)
 
 class BudgetAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount', 'created_at')
+    list_display = ('user', 'month', 'amount', 'created_at')
     search_fields = ('user__username',)
 
 admin.site.register(Budget, BudgetAdmin)
