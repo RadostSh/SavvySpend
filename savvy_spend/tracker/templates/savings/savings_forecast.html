@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Forecast for Your Savings</h1>
+
+<p><strong>Total Saved:</strong> ${{ total_savings }}</p>
+<p><strong>Average Monthly Savings:</strong> ${{ avg_savings_per_month }}</p>
+<p><strong>Predicted Savings for Next Month:</strong> ${{ predicted_savings }}</p>
+
+<h2>Add New Savings</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<div class="calculator">
+    <h2>Financial Planning Calculator</h2>
+    <form id="savings-calculator" data-avg-savings="{{ avg_savings_per_month }}">
+        <label>Enter Your Savings Goal:</label>
+        <input type="number" id="target-savings" step="0.01" required>
+        <button type="submit">Calculate</button>
+    </form>
+
+    <h3>Required Monthly Savings: <span id="required-savings">-</span></h3>
+</div>
+
+<div class="AI">
+    <h2>AI Financial Advice</h2>
+    <button id="generate-advice">Generate Financial Advice</button>
+    <div class="advice-box" id="advice-box">
+        {% if financial_advice %}
+            <p>{{ financial_advice }}</p>
+        {% else %}
+            <p>Click the button to generate financial advice.</p>
+        {% endif %}
+    </div>
+</div>
+
+<a href="{% url 'index' %}" class="home-link">Back to Home</a>
+
+{% endblock %}

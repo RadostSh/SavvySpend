@@ -1,5 +1,5 @@
 from django import forms
-from .models import Transaction, Category, Budget, SavingGoal
+from .models import Transaction, Category, Budget, SavingGoal, Savings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -56,4 +56,12 @@ class SavingGoalForm(forms.ModelForm):
         fields = ['name', 'target_amount', 'current_amount', 'deadline']
         widgets = {
             'deadline': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class SavingsForm(forms.ModelForm):
+    class Meta:
+        model = Savings
+        fields = ['amount']
+        widgets = {
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter amount'})
         }

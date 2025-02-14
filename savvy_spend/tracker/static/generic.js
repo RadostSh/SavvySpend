@@ -183,9 +183,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const amountElement = document.getElementById('amounts');
         const amount = amountElement.value.trim();
 
-        console.log(`🔍 DEBUG: Полето за сума е:`, amountElement);
-        console.log(`🔍 DEBUG: Въведена сума → "${amount}"`);
-
         if (!fromCurrency || !toCurrency || amount === "") {
             alert("Моля, въведете сума за конвертиране!");
             amountElement.focus();
@@ -204,4 +201,59 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error('Error:', error));
     });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const savingsCalculator = document.getElementById('savings-calculator');
+    
+    if (savingsCalculator) {
+        savingsCalculator.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const targetAmount = parseFloat(document.getElementById('target-savings').value);
+            const avgSavings = parseFloat(document.getElementById('savings-calculator').dataset.avgSavings);
+            
+            if (isNaN(targetAmount) || targetAmount <= 0) {
+                alert("Please enter a valid target amount.");
+                return;
+            }
+            
+            const monthsRequired = Math.ceil(targetAmount / avgSavings);
+            document.getElementById('required-savings').innerText = `You need to save $${(targetAmount / monthsRequired).toFixed(2)} per month for the next ${monthsRequired} months.`;
+        });
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const generateBtn = document.getElementById('generate-advice');
+    const adviceBox = document.getElementById('advice-box');
+
+    if (generateBtn && adviceBox) {
+        generateBtn.addEventListener('click', async function () {
+            adviceBox.innerHTML = '<p>Loading advice...</p>';
+
+            try {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const response = await fetch('/generate_financial_advice/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    },
+                });
+
+                const data = await response.json();
+                const formattedText = data.financial_advice
+                    .replace(/\*/g, '')
+                    .split('\n')
+                    .map(paragraph => `<p>${paragraph}</p>`)
+                    .join('');
+
+                adviceBox.innerHTML = formattedText;
+            } catch (error) {
+                adviceBox.innerHTML = '<p>Failed to generate advice. Please try again.</p>';
+                console.error('Error:', error);
+            }
+        });
+    }
 });

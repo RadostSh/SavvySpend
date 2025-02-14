@@ -458,6 +458,10 @@ form button[type="submit"] {
     transition: background-color 0.3s;
 }
 
+form button[type="submit"]:hover {
+    background-color: #9370db;
+}
+
 .list-transactions-page {
     display: inline-block;
     margin-top: 20px;
@@ -547,4 +551,53 @@ h2 {
     font-size: 16px;
     transition: background-color 0.3s;
     margin-top: 20px;
+}
+
+.calculator button[type="submit"]{
+    margin-top: 15px;
+}
+
+.calculator button[type="submit"]:hover{
+    background-color: #9370db;
+}
+
+.advice-box p {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.advice-box strong {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.advice-box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+#generate-advice {
+    background-color: #6a5acd;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+#generate-advice:hover {
+    background-color: #9370db;
 }

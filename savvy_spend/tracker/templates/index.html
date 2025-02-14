@@ -92,6 +92,14 @@
         <h3>Converted Amount: <span id="converted-amount">-</span></h3>
     </div>
     
+    <div class="card savings">
+        <h2>Savings Forecast</h2>
+        <p><strong>Total Saved:</strong> ${{ total_savings }}</p>
+        <p><strong>Average Monthly Savings:</strong> ${{ avg_savings_per_month }}</p>
+        <p><strong>Predicted Savings for Next Month:</strong> ${{ predicted_savings }}</p>
+        <a href="{% url 'savings_forecast' %}" class="home-link">View Savings Forecast</a>
+    </div>
+
 </div>
 
 <form action="{% url 'logout' %}" method="post" class="button">

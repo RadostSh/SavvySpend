@@ -5,30 +5,53 @@ from django.db import models
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from decimal import Decimal
-from datetime import date
-from .forms import RegisterUserForm, TransactionForm, CategoryForm, BudgetForm, SavingGoalForm
-from .models import Category, Transaction, Budget, SavingGoal
+from datetime import date, timedelta
+from .forms import RegisterUserForm, TransactionForm, CategoryForm, BudgetForm, SavingGoalForm, SavingsForm
+from .models import Category, Transaction, Budget, SavingGoal, Savings
 from .currency import get_exchange_rate
+from .utils import get_financial_advice
 
 @login_required(login_url='/login')
 def index(request):
     """Welcome page."""
-    total_income = Transaction.objects.filter(type='income').aggregate(models.Sum('amount'))['amount__sum'] or 0
-    total_expense = Transaction.objects.filter(type='expense').aggregate(models.Sum('amount'))['amount__sum'] or 0
+    user = request.user
+    today = date.today()
+
+    total_income = Transaction.objects.filter(type='income').aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expense = Transaction.objects.filter(type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
     balance = round(total_income - total_expense, 2)
 
     categories = Category.objects.all()
 
+    # 🔹 Изчисляване на общите спестявания
+    total_savings = Savings.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # 🔹 Изчисляване на средно месечно спестяване за последните 6 месеца
+    last_six_months = today - timedelta(days=180)
+    total_income = Transaction.objects.filter(
+        user=user, type='income', date__gte=last_six_months
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    total_expense = Transaction.objects.filter(
+        user=user, type='expense', date__gte=last_six_months
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    avg_savings_per_month = round((total_income - total_expense) / 6, 2) if total_income > total_expense else 0
+    predicted_savings = avg_savings_per_month if avg_savings_per_month > 0 else 0
+
     context = {
         'username': request.user.username,
         'categories': categories,
-        'balance': balance
+        'balance': balance,
+        'total_savings': total_savings,
+        'avg_savings_per_month': avg_savings_per_month,
+        'predicted_savings': predicted_savings
     }
     return render(request, 'index.html', context)
 
-@login_required
+@login_required(login_url='/login')
 def register(request):
     if request.method == "POST":
         form = RegisterUserForm(request.POST)
@@ -43,7 +66,7 @@ def register(request):
     }
     return render(request, 'registration/register.html', context)
 
-@login_required
+@login_required(login_url='/login')
 def add_category(request):
     user = request.user
     form = CategoryForm()
@@ -67,17 +90,17 @@ def add_category(request):
 
     return render(request, 'index.html', {'form': form, 'categories': categories, 'balance': balance})
 
-@login_required
+@login_required(login_url='/login')
 def list_categories(request):
     categories = Category.objects.all().order_by('name')
     return render(request, 'categories/list_categories.html', {'categories': categories})
 
-@login_required
+@login_required(login_url='/login')
 def list_transactions(request):
     transactions = Transaction.objects.all().order_by('-date')
     return render(request, 'transactions/list_transactions.html', {'transactions': transactions})
 
-@login_required
+@login_required(login_url='/login')
 def add_transaction(request):
     user = request.user
     form = TransactionForm() 
@@ -104,7 +127,7 @@ def add_transaction(request):
     
     return render(request, 'index.html', {'form': form, 'transactions': transactions})
 
-@login_required
+@login_required(login_url='/login')
 def edit_transaction(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id)
     if request.method == 'POST':
@@ -117,7 +140,7 @@ def edit_transaction(request, transaction_id):
 
     return render(request, 'transactions/edit_transaction.html', {'form': form, 'transaction': transaction})
 
-@login_required
+@login_required(login_url='/login')
 def delete_transaction(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id)
     transaction.delete()
@@ -131,7 +154,7 @@ def delete_transaction(request, transaction_id):
 
     return redirect('transactions/list_transactions')
 
-@login_required
+@login_required(login_url='/login')
 def delete_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     
@@ -146,14 +169,14 @@ def delete_category(request, category_id):
 
     return redirect('list_categories')
 
-@login_required
+@login_required(login_url='/login')
 def category_transactions(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     transactions = Transaction.objects.filter(category=category)
 
     return render(request, 'categories/category_transactions.html', {'category': category, 'transactions': transactions})
 
-@login_required
+@login_required(login_url='/login')
 def budget(request):
     user = request.user
     current_month = date.today().month
@@ -212,7 +235,7 @@ def budget(request):
         'existing_budgets': existing_budgets
     })
 
-@login_required
+@login_required(login_url='/login')
 def savings(request):
     """Показва всички спестовни цели и форма за нова цел."""
     goals = SavingGoal.objects.filter(user=request.user).order_by('-created_at')
@@ -229,7 +252,7 @@ def savings(request):
 
     return render(request, 'savings/savings.html', {'form': form, 'goals': goals})
 
-@login_required
+@login_required(login_url='/login')
 def add_to_savings(request, goal_id):
     """Добавяне на пари към спестената сума от баланса."""
     goal = get_object_or_404(SavingGoal, id=goal_id, user=request.user)
@@ -266,6 +289,7 @@ def add_to_savings(request, goal_id):
 
     return redirect("savings")
 
+@login_required(login_url='/login')
 def convert_currency(request):
     """Конвертира сума от една валута в друга."""
     if request.method == "GET":
@@ -294,3 +318,71 @@ def convert_currency(request):
             return JsonResponse({"error": "Invalid amount"}, status=400)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required(login_url='/login')
+def savings_forecast(request):
+    """Прогнозира бъдещите спестявания и позволява записване на нови"""
+
+    user = request.user
+    today = date.today()
+
+    # Взимаме всички спестявания на потребителя
+    total_savings = Savings.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Взимаме всички приходи и разходи за последните 6 месеца
+    last_six_months = today - timedelta(days=180)
+    total_income = Transaction.objects.filter(
+        user=user, type='income', date__gte=last_six_months
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    total_expense = Transaction.objects.filter(
+        user=user, type='expense', date__gte=last_six_months
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Средно месечно спестяване
+    avg_savings_per_month = round((total_income - total_expense) / 6, 2) if total_income > total_expense else 0
+    predicted_savings = avg_savings_per_month if avg_savings_per_month > 0 else 0
+
+    # Обработване на формата за добавяне на спестявания
+    if request.method == "POST":
+        form = SavingsForm(request.POST)
+        if form.is_valid():
+            savings = form.save(commit=False)
+            savings.user = user
+            savings.save()
+            return redirect('savings_forecast')  # Презареждане на страницата
+
+    else:
+        form = SavingsForm()
+
+
+    return render(request, 'savings/savings_forecast.html', {
+        'form': form,
+        'total_savings': total_savings,
+        'avg_savings_per_month': avg_savings_per_month,
+        'predicted_savings': predicted_savings,
+    })
+
+def generate_financial_advice(request):
+
+    user = request.user
+    today = date.today()
+    # Take all user savings
+    total_savings = Savings.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Take all income and expenses for the last 6 months
+    last_six_months = today - timedelta(days=180)
+    total_income = Transaction.objects.filter(
+        user=user, type='income', date__gte=last_six_months
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    total_expense = Transaction.objects.filter(
+        user=user, type='expense', date__gte=last_six_months
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    avg_savings_per_month = round((total_income - total_expense) / 6, 2) if total_income > total_expense else 0
+    predicted_savings = avg_savings_per_month if avg_savings_per_month > 0 else 0
+
+    financial_advice = get_financial_advice(avg_savings_per_month, total_expense / 6, total_income / 6)
+
+    return JsonResponse({'financial_advice': financial_advice})

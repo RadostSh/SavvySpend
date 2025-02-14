@@ -23,4 +23,6 @@ urlpatterns = [
     path('savings/', views.savings, name='savings'),
     path('savings/add/<int:goal_id>/', views.add_to_savings, name='add_to_savings'),
     path('convert/', views.convert_currency, name='convert_currency'),
+    path('savings_forecast/', views.savings_forecast, name='savings_forecast'),
+    path('generate_financial_advice/', views.generate_financial_advice, name='generate_financial_advice'),
 ]
