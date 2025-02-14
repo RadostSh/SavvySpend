@@ -531,7 +531,7 @@ form button[type="submit"] {
     background-color: #a90c0c;
 }
 
-.budget-container h2 {
+h2 {
     color: #db7093;
     margin-bottom: 20px;
     font-size: 30px;

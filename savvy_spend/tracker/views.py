@@ -6,9 +6,10 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login
 from django.db.models import Sum
+from decimal import Decimal
 from datetime import date
-from .forms import RegisterUserForm, TransactionForm, CategoryForm, BudgetForm
-from .models import Category, Transaction, Budget
+from .forms import RegisterUserForm, TransactionForm, CategoryForm, BudgetForm, SavingGoalForm
+from .models import Category, Transaction, Budget, SavingGoal
 
 @login_required(login_url='/login')
 def index(request):
@@ -26,6 +27,7 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
+@login_required
 def register(request):
     if request.method == "POST":
         form = RegisterUserForm(request.POST)
@@ -40,7 +42,9 @@ def register(request):
     }
     return render(request, 'registration/register.html', context)
 
+@login_required
 def add_category(request):
+    user = request.user
     form = CategoryForm()
     categories = Category.objects.all().order_by('name')
 
@@ -51,8 +55,9 @@ def add_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
+            category = form.save(commit=False)
+            category.user = user
             category = form.save()
-            category.user = request.user
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -65,16 +70,19 @@ def add_category(request):
 
     return render(request, 'index.html', {'form': form, 'categories': categories, 'balance': balance})
 
-
+@login_required
 def list_categories(request):
     categories = Category.objects.all().order_by('name')
     return render(request, 'categories/list_categories.html', {'categories': categories})
 
+@login_required
 def list_transactions(request):
     transactions = Transaction.objects.all().order_by('-date')
     return render(request, 'transactions/list_transactions.html', {'transactions': transactions})
 
+@login_required
 def add_transaction(request):
+    user = request.user
     form = TransactionForm() 
     transactions = Transaction.objects.all().order_by('-date')
 
@@ -85,8 +93,9 @@ def add_transaction(request):
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
+            transaction = form.save(commit=False)
+            transaction.user = user
             transaction = form.save()
-            transaction.user = request.user
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -102,6 +111,7 @@ def add_transaction(request):
     
     return render(request, 'index.html', {'form': form, 'transactions': transactions, 'balance': balance})
 
+@login_required
 def edit_transaction(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id)
     if request.method == 'POST':
@@ -114,6 +124,7 @@ def edit_transaction(request, transaction_id):
 
     return render(request, 'transactions/edit_transaction.html', {'form': form, 'transaction': transaction})
 
+@login_required
 def delete_transaction(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id)
     transaction.delete()
@@ -127,6 +138,7 @@ def delete_transaction(request, transaction_id):
 
     return redirect('transactions/list_transactions')
 
+@login_required
 def delete_category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     
@@ -138,6 +150,7 @@ def delete_category(request, category_id):
 
     return redirect('list_categories')
 
+@login_required
 def category_transactions(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     transactions = Transaction.objects.filter(category=category)
@@ -150,7 +163,6 @@ def budget(request):
     current_month = date.today().month
     current_year = date.today().year
 
-    # Намираме или създаваме бюджет за текущия месец
     monthly_budget, created = Budget.objects.get_or_create(
         user=user,
         month=current_month,
@@ -163,7 +175,6 @@ def budget(request):
         if form.is_valid():
             budget = form.save()
             
-            # ✅ Проверяваме дали заявката е AJAX
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
@@ -174,15 +185,13 @@ def budget(request):
                     }
                 })
 
-            return redirect('budget')  # Ако не е AJAX, редиректваме
+            return redirect('budget')
 
     else:
         form = BudgetForm(instance=monthly_budget)
 
-    # ✅ Зареждаме всички бюджети на потребителя
     existing_budgets = Budget.objects.filter(user=user).order_by('-year', '-month')
 
-    # ✅ Изчисляваме Total Income & Total Expense за текущия месец
     total_income = Transaction.objects.filter(
         user=user, type='income', date__month=current_month, date__year=current_year
     ).aggregate(Sum('amount'))['amount__sum'] or 0
@@ -193,7 +202,6 @@ def budget(request):
 
     balance = round(total_income - total_expense, 2)
 
-    # ✅ Добавяме Total Income & Total Expense за всеки бюджет
     for budget in existing_budgets:
         budget.total_income = Transaction.objects.filter(
             type='income', date__month=budget.month, date__year=budget.year
@@ -203,13 +211,66 @@ def budget(request):
             type='expense', date__month=budget.month, date__year=budget.year
         ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-        # ✅ Изчисляваме разликата
         budget.difference = round(budget.total_income - budget.total_expense, 2)
 
     return render(request, 'budgets/budget.html', {
         'form': form,
         'total_income': total_income,
         'total_expense': total_expense,
-        'balance': balance,  # ✅ Добавяме баланса
-        'existing_budgets': existing_budgets  # ✅ Изпращаме списъка с бюджети
+        'balance': balance,
+        'existing_budgets': existing_budgets
     })
+
+@login_required
+def savings(request):
+    """Показва всички спестовни цели и форма за нова цел."""
+    goals = SavingGoal.objects.filter(user=request.user).order_by('-created_at')
+
+    if request.method == 'POST':
+        form = SavingGoalForm(request.POST)
+        if form.is_valid():
+            goal = form.save(commit=False)
+            goal.user = request.user
+            goal.save()
+            return redirect('savings')
+    else:
+        form = SavingGoalForm()
+
+    return render(request, 'savings/savings.html', {'form': form, 'goals': goals})
+
+@login_required
+def add_to_savings(request, goal_id):
+    """Добавяне на пари към спестената сума от баланса."""
+    goal = get_object_or_404(SavingGoal, id=goal_id, user=request.user)
+
+    if request.method == "POST":
+        amount = request.POST.get("amount")
+
+        try:
+            amount = Decimal(amount)
+            if amount > 0:
+                total_income = Transaction.objects.filter(user=request.user, type='income').aggregate(Sum('amount'))['amount__sum'] or 0
+                total_expense = Transaction.objects.filter(user=request.user, type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
+                current_balance = total_income - total_expense
+
+                if amount > current_balance:
+                    return redirect("savings")
+
+                Transaction.objects.create(
+                    user=request.user,
+                    date=date.today(),
+                    type='expense',
+                    amount=amount,
+                    category=None,
+                    description=f"Transferred ${amount} to savings"
+                )
+
+                goal.current_amount += amount
+                goal.save()
+
+                return redirect("savings")
+
+        except Exception as e:
+            return redirect("savings")
+
+    return redirect("savings")

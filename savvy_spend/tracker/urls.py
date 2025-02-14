@@ -20,4 +20,6 @@ urlpatterns = [
     path('delete_category/<int:category_id>/', views.delete_category, name='delete_category'),
     path('category_transactions/<int:category_id>/', views.category_transactions, name='category_transactions'),
     path('budget/', views.budget, name='budget'),
+    path('savings/', views.savings, name='savings'),
+    path('savings/add/<int:goal_id>/', views.add_to_savings, name='add_to_savings'),
 ]

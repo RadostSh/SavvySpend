@@ -134,8 +134,8 @@ document.getElementById('add-budget-form').addEventListener('submit', function(e
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td>${data.budget.month}/${data.budget.year}</td>
-                <td>$0.00</td>  <!-- Тук може да добавим приходи, ако искаш -->
-                <td>$0.00</td>  <!-- Тук може да добавим разходи -->
+                <td>$0.00</td>
+                <td>$0.00</td>
                 <td>$${data.budget.amount}</td>
             `;
             document.getElementById('budget-list').appendChild(newRow);
@@ -147,4 +147,37 @@ document.getElementById('add-budget-form').addEventListener('submit', function(e
     })
     .catch(error => console.error('Error:', error));
 });
+
+document.querySelectorAll('.add-funds-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const goalId = this.dataset.goalId;
+        const formData = new FormData(this);
+        const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(`/savings/add/${goalId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Funds added successfully');
+
+                document.getElementById(`saved-amount-${goalId}`).innerText = `$${data.goal.current_amount}`;
+                document.getElementById(`progress-${goalId}`).innerText = `${data.goal.progress}%`;
+
+                this.reset();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+
 

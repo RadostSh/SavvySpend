@@ -55,10 +55,13 @@
 
     <div class="card budget">
         <h2>Budget</h2>
-        <p><strong>Total Available Budget:</strong> ${{ total_budget }}</p>
-        <p><strong>Current Month's Budget:</strong> ${{ monthly_budget.amount }}</p>
-        <p><strong>Remaining:</strong> ${{ balance }}</p>
+        <p><strong>Your Current Balance:</strong> ${{ balance }}</p>
         <a href="{% url 'budget' %}" class="home-link">Manage Budget</a>
+    </div>
+
+    <div class="card savings">
+        <h2>Savings Goals</h2>
+        <a href="{% url 'savings' %}" class="home-link">Manage Savings</a>
     </div>
     
 </div>
