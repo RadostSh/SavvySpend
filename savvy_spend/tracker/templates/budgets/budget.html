@@ -19,14 +19,16 @@
             <th>Total Income for Month</th>
             <th>Total Expenses for Month</th>
             <th>Difference</th>
+            <th>Budget</th>
+            <th>Percentage Spent</th>
         </tr>
     </thead>
-    <tbody id="budget-list">
+    <tbody>
         {% for budget in existing_budgets %}
         <tr>
             <td>{{ budget.month }}/{{ budget.year }}</td>
-            <td>${{ budget.total_income|default:"0.00" }}</td>
-            <td>${{ budget.total_expense|default:"0.00" }}</td>
+            <td>${{ budget.total_income }}</td>
+            <td>${{ budget.total_expense }}</td>
             <td>
                 {% if budget.difference >= 0 %}
                     <span style="color: green;">+${{ budget.difference }}</span>
@@ -34,9 +36,11 @@
                     <span style="color: red;">-${{ budget.difference|floatformat:2 }}</span>
                 {% endif %}
             </td>
+            <td>${{ budget.amount }}</td>
+            <td>{{ budget.expense_percentage }}%</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4">No budgets found.</td></tr>
+        <tr><td colspan="6">No budgets found.</td></tr>
         {% endfor %}
     </tbody>
 </table>

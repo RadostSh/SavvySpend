@@ -159,17 +159,17 @@ def budget(request):
     current_month = date.today().month
     current_year = date.today().year
 
-    monthly_budget, created = Budget.objects.get_or_create(
-        user=user,
-        month=current_month,
-        year=current_year,
-        defaults={'amount': 0}  
-    )
+    try:
+        monthly_budget = Budget.objects.get(user=user, month=current_month, year=current_year)
+    except Budget.DoesNotExist:
+        monthly_budget = None
 
     if request.method == 'POST':
         form = BudgetForm(request.POST, instance=monthly_budget)
         if form.is_valid():
-            budget = form.save()
+            budget = form.save(commit=False)
+            budget.user = user
+            budget.save()
 
             return redirect('budget')
 
@@ -198,6 +198,11 @@ def budget(request):
         ).aggregate(Sum('amount'))['amount__sum'] or 0
 
         budget.difference = round(budget.total_income - budget.total_expense, 2)
+
+        if budget.amount > 0:
+            budget.expense_percentage = round((budget.total_expense / budget.amount) * 100, 2)
+        else:
+            budget.expense_percentage = 0
 
     return render(request, 'budgets/budget.html', {
         'form': form,
