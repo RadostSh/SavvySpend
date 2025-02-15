@@ -49,7 +49,6 @@ class SavingGoal(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def progress_percentage(self):
-        """Изчислява процента на изпълнение на целта."""
         if self.target_amount > 0:
             return round((self.current_amount / self.target_amount) * 100, 2)
         return 0

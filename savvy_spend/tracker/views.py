@@ -234,7 +234,7 @@ def budget(request):
 
 @login_required(login_url='/login')
 def savings(request):
-    """Показва всички спестовни цели и форма за нова цел."""
+    """Show all savings goals and a form for a new goal."""
     goals = SavingGoal.objects.filter(user=request.user).order_by('-created_at')
 
     if request.method == 'POST':
@@ -251,7 +251,7 @@ def savings(request):
 
 @login_required(login_url='/login')
 def add_to_savings(request, goal_id):
-    """Добавяне на пари към спестената сума от баланса."""
+    """Add money to your saved balance."""
     goal = get_object_or_404(SavingGoal, id=goal_id, user=request.user)
 
     if request.method == "POST":
@@ -288,7 +288,6 @@ def add_to_savings(request, goal_id):
 
 @login_required(login_url='/login')
 def convert_currency(request):
-    """Конвертира сума от една валута в друга."""
     if request.method == "GET":
         from_currency = request.GET.get("from")
         to_currency = request.GET.get("to")
@@ -318,8 +317,7 @@ def convert_currency(request):
 
 @login_required(login_url='/login')
 def savings_forecast(request):
-    """Прогнозира бъдещите спестявания и позволява записване на нови"""
-
+    """Predict future saving and allow recording new ones"""
     user = request.user
     today = date.today()
 
