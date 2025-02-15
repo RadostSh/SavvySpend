@@ -11,7 +11,7 @@
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Save</button>
+    <button class="btn" type="submit">Save</button>
 </form>
 
 <div class="calculator">
@@ -19,7 +19,7 @@
     <form id="savings-calculator" data-avg-savings="{{ avg_savings_per_month }}">
         <label>Enter Your Savings Goal:</label>
         <input type="number" id="target-savings" step="0.01" required>
-        <button type="submit">Calculate</button>
+        <button class="btn" type="submit">Calculate</button>
     </form>
 
     <h3>Required Monthly Savings: <span id="required-savings">-</span></h3>
@@ -27,7 +27,7 @@
 
 <div class="AI">
     <h2>AI Financial Advice</h2>
-    <button id="generate-advice">Generate Financial Advice</button>
+    <button class="btn" id="generate-advice">Generate Financial Advice</button>
     <div class="advice-box" id="advice-box">
         {% if financial_advice %}
             <p>{{ financial_advice }}</p>

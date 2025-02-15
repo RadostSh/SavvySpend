@@ -51,7 +51,6 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
-@login_required(login_url='/login')
 def register(request):
     if request.method == "POST":
         form = RegisterUserForm(request.POST)
