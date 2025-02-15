@@ -122,7 +122,7 @@ def add_transaction(request):
                     }
                 })
     
-    return render(request, 'index.html', {'form': form, 'transactions': transactions})
+    return render(request, 'index.html', {'form': form, 'transactions': transaction})
 
 @login_required(login_url='/login')
 def edit_transaction(request, transaction_id):
@@ -323,10 +323,8 @@ def savings_forecast(request):
     user = request.user
     today = date.today()
 
-    # Взимаме всички спестявания на потребителя
     total_savings = Savings.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Взимаме всички приходи и разходи за последните 6 месеца
     last_six_months = today - timedelta(days=180)
     total_income = Transaction.objects.filter(
         user=user, type='income', date__gte=last_six_months
@@ -336,22 +334,19 @@ def savings_forecast(request):
         user=user, type='expense', date__gte=last_six_months
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Средно месечно спестяване
     avg_savings_per_month = round((total_income - total_expense) / 6, 2) if total_income > total_expense else 0
     predicted_savings = avg_savings_per_month if avg_savings_per_month > 0 else 0
 
-    # Обработване на формата за добавяне на спестявания
     if request.method == "POST":
         form = SavingsForm(request.POST)
         if form.is_valid():
             savings = form.save(commit=False)
             savings.user = user
             savings.save()
-            return redirect('savings_forecast')  # Презареждане на страницата
+            return redirect('savings_forecast')
 
     else:
         form = SavingsForm()
-
 
     return render(request, 'savings/savings_forecast.html', {
         'form': form,
