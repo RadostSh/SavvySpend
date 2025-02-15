@@ -19,16 +19,14 @@ def index(request):
     user = request.user
     today = date.today()
 
-    total_income = Transaction.objects.filter(type='income').aggregate(Sum('amount'))['amount__sum'] or 0
-    total_expense = Transaction.objects.filter(type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
+    total_income = Transaction.objects.filter(user=user, type='income').aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expense = Transaction.objects.filter(user=user, type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
     balance = round(total_income - total_expense, 2)
 
-    categories = Category.objects.all()
+    categories = Category.objects.filter(user=user).all()
 
-    # 🔹 Изчисляване на общите спестявания
     total_savings = Savings.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # 🔹 Изчисляване на средно месечно спестяване за последните 6 месеца
     last_six_months = today - timedelta(days=180)
     total_income = Transaction.objects.filter(
         user=user, type='income', date__gte=last_six_months
@@ -69,7 +67,6 @@ def register(request):
 def add_category(request):
     user = request.user
     form = CategoryForm()
-    categories = Category.objects.all().order_by('name')
 
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -91,19 +88,20 @@ def add_category(request):
 
 @login_required(login_url='/login')
 def list_categories(request):
-    categories = Category.objects.all().order_by('name')
+    user = request.user
+    categories = Category.objects.filter(user=user).all().order_by('name')
     return render(request, 'categories/list_categories.html', {'categories': categories})
 
 @login_required(login_url='/login')
 def list_transactions(request):
-    transactions = Transaction.objects.all().order_by('-date')
+    user = request.user
+    transactions = Transaction.objects.filter(user=user).all().order_by('-date')
     return render(request, 'transactions/list_transactions.html', {'transactions': transactions})
 
 @login_required(login_url='/login')
 def add_transaction(request):
     user = request.user
     form = TransactionForm() 
-    transactions = Transaction.objects.all().order_by('-date')
 
     if request.method == 'POST':
         form = TransactionForm(request.POST)
