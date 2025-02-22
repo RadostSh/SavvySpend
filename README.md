@@ -1,67 +1,65 @@
 # **SavvySpend**
 
-##  Описание
+## Description
 
-​	SavvySpend е уеб приложение за управление на лични финанси, което позволява на потребителите да следят своите приходи, разходи, бюджети и спестовни цели. Приложението разполага с функции за автоматизирано прогнозиране на спестяванията, AI-базирани финансови съвети и конвертиране на валути в реално време.
+ SavvySpend is a web-based personal finance management application that allows users to track their income, expenses, budgets, and special goals. The application features automated forecasting, AI-based financial advice, and real-time currency conversion.
 
+## Key Features
 
+### Login, Logout, and Registration
 
-## Основни функционалности
+- Add Transactions - Users can record transactions with details such as date, amount, category, and description.
+- Users can register on the platform, log in as a user, and log out. see all transactions made, sorted by data
+- Users can edit income and expense transactions.
+- Users can delete a transaction.
 
-### Вход, изход и регистрация
+### Manage Transactions
 
-- Добавяне на транзакции - Потребителите могат да записват транзакции с подробности като дата, сума, категория и описание.
-- Потребителите могат да се регистрират в платформата, да влезнат като потребител в нея и да излезнат.видят всички направени транзакции, сортирани по дата
-- Потребителите могат да редактират транзакциите за приходи и разходи.
-- Потребителите могат да изтрият дадена транзакция.
+- Add Transactions - Users can record transactions with details such as date, amount, category, and description.
+- Users can see all transactions made, sorted by data
+- Users can edit income and expense transactions.
+- Users can delete a given transaction.
 
-### Управление на транзакции
+### Expense categorization
 
-- Добавяне на транзакции - Потребителите могат да записват транзакции с подробности като дата, сума, категория и описание.
-- Потребителите могат да видят всички направени транзакции, сортирани по дата
-- Потребителите могат да редактират транзакциите за приходи и разходи.
-- Потребителите могат да изтрият дадена транзакция.
+- Create user categories (e.g. "Food", "Transportation", "Entertainment").
+- Automatic grouping of transactions by category - when clicking on a given category, users can see all transactions made for that category.
+- Users can delete the given category.
 
-### Категоризация на разходите
+### Budgeting
 
-- Създаване на потребителски категории (напр. "Храна", "Транспорт", "Забавления").
-- Автоматично групиране на транзакциите по категории - при натискане на дадена категория, потребителите могат да видят всички направени транзакции за тази категория.
-- Потребителите могат да изтрият дадена категория.
+- Users see the current balance.
+- Set a monthly budget by entering the budget for the month and which month and year it applies to.
+- Users can track all income and expenses for the month, what is the difference between them, as well as the budget for the month and what percentage of it they have fulfilled.
+- Compare actual expenses with the budget.
 
-### Бюджетиране
+### Savings Goals
 
-- Потребителите виждат текущия баланс.
-- Задаване на месечен бюджет като се въвеждат бюджета за месеца и за кой месец и година се отнасят.
-- Потребителите могат да следят всички приходи и разходи за месеца, каква е разликата между тях, както и бюджета за месеца и колко процента от него са изпълнили.
-- Сравняване на реалните разходи с бюджета.
+- The user can create goals that are given a name, amount to save, starting amount to save and deadline to achieve the goal.
+- The user can add funds to the savings.
+- The user can track the progress of saving in percentages.
 
-### Спестовни цели
+### Currency Conversion
 
-- Потребителят може да създава цели, на които им задава име, сума за спестяване, начална сума за спестяване и краен срок за постигане на целта.
-- Потребителят може да добавя средства към спестяванията.
-- Потребителят може да проследява прогреса на спестяване в проценти.
+- The user can convert the desired amount into different currencies.
+- Real-time exchange rate calculation.
+- Support for multiple currencies (BGN, USD, EUR, GBP).
+- Integration with ExchangeRate-API.
 
-### Конвертиране на валути
+### Forecasting future successes
 
-- Потребителят може да конвертира желана сума в различни валути.
-- Изчисляване на валутни курсове в реално време.
-- Поддръжка на множество валути (BGN, USD, EUR, GBP).
-- Интеграция с ExchangeRate-API.
+- Analysis of previous transactions.
+- On the home page, the user can monitor the current saved amount that he has set, average monthly savings (for the last 6 months) and estimated savings for the next month.
+- Forecasting future income and expenses.
 
-### Прогнозиране на бъдещи спестявания
+### Interactive financial planning calculator
 
-- Анализ на предходни транзакции.
-- На началната страница потребителят може да следи текущата спестена сума, която е задал, средно месечно спестяване (за последните 6 месеца) и прогнозни спестявания за следващия месец.
-- Предвиждане на бъдещи приходи и разходи.
+- The user enters the desired amount to save.
+- The calculator calculates how much you should save per month based on your current average savings.
+- Shows how many months it will take you to reach your goal.
 
-### Интерактивен калкулатор за финансово планиране
+### AI Financial Advice
 
-- Потребителят въвежда желаната сума за спестяване.
-- Калкулаторът изчислява колко трябва да спестява месечно въз основа на текущите му средни спестявания.
-- Показва за колко месеца ще постигне целта си.
-
-### AI Финансови съвети
-
-- Интеграция с Google Gemini API.
-- Персонализирани съвети според финансовите данни.
-- Автоматичен анализ на бюджетните навици.
+- Integration with Google Gemini API.
+- Personalized advice based on your financial data.
+- Automatic analysis of budgeting habits.
