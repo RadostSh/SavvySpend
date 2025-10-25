@@ -15,7 +15,7 @@ def get_financial_advice(total_savings, avg_savings_per_month, predicted_savings
     Дай ми персонализиран финансов съвет как мога да подобря спестяванията си и да намаля ненужните разходи.
     """
 
-    model = genai.GenerativeModel("gemini-pro")
+    model = genai.GenerativeModel("gemini-2.5-pro")
     response = model.generate_content(prompt)
 
     return response.text.strip() if response.text else "Не успях да генерирам съвет."
