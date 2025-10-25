@@ -2,20 +2,17 @@
 
 ## Description
 
- SavvySpend is a web-based personal finance management application that allows users to track their income, expenses, budgets, and special goals. The application features automated forecasting, AI-based financial advice, and real-time currency conversion.
+ SavvySpend is a web-based personal finance management application that allows users to track their income, expenses, budgets, and special goals. The application features automated forecasting, AI-based financial advice and real-time currency conversion.
 
 ## Key Features
 
-### Login, Logout, and Registration
+### Registration, Login and Logout
 
-- Add Transactions - Users can record transactions with details such as date, amount, category, and description.
-- Users can register on the platform, log in as a user, and log out. see all transactions made, sorted by data
-- Users can edit income and expense transactions.
-- Users can delete a transaction.
+- Users can register on the platform, log in as a user and log out.
 
 ### Manage Transactions
 
-- Add Transactions - Users can record transactions with details such as date, amount, category, and description.
+- Add Transactions - Users can record transactions with details such as date, amount, category and description.
 - Users can see all transactions made, sorted by data
 - Users can edit income and expense transactions.
 - Users can delete a given transaction.
@@ -31,7 +28,6 @@
 - Users see the current balance.
 - Set a monthly budget by entering the budget for the month and which month and year it applies to.
 - Users can track all income and expenses for the month, what is the difference between them, as well as the budget for the month and what percentage of it they have fulfilled.
-- Compare actual expenses with the budget.
 
 ### Savings Goals
 
